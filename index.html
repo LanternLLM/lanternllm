@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lantern — AI Visibility for Africa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a08;
+      --surface: #111110;
+      --surface2: #1a1a17;
+      --border: #2a2a24;
+      --amber: #f5a623;
+      --amber-dim: #c4821a;
+      --amber-glow: rgba(245, 166, 35, 0.12);
+      --amber-glow-strong: rgba(245, 166, 35, 0.22);
+      --text: #e8e4d9;
+      --text-dim: #8a8578;
+      --text-faint: #4a4840;
+      --green: #4ade80;
+      --red: #f87171;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* NOISE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.6;
+    }
+
+    /* GLOW ORBS */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,166,35,0.08) 0%, transparent 70%);
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+    }
+    .orb-2 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(245,166,35,0.05) 0%, transparent 70%);
+      bottom: 20%; right: -50px;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s, background 0.3s;
+      backdrop-filter: blur(0px);
+    }
+    nav.scrolled {
+      border-color: var(--border);
+      background: rgba(10,10,8,0.85);
+      backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--amber);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo svg { width: 22px; height: 22px; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--amber);
+      color: #0a0a08 !important;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 500 !important;
+      font-size: 13px !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: #ffc04a !important; color: #0a0a08 !important; }
+
+    /* SECTIONS */
+    section { position: relative; z-index: 1; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--amber);
+      margin-bottom: 32px;
+      background: var(--amber-glow);
+      letter-spacing: 0.05em;
+      animation: fadeUp 0.6s ease both;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      background: var(--amber);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(42px, 7vw, 80px);
+      line-height: 1.05;
+      letter-spacing: -2px;
+      max-width: 900px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--amber);
+    }
+
+    .hero-sub {
+      margin-top: 24px;
+      font-size: clamp(16px, 2vw, 19px);
+      color: var(--text-dim);
+      max-width: 560px;
+      font-weight: 300;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-code {
+      margin-top: 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 28px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      color: var(--text-dim);
+      text-align: left;
+      max-width: 440px;
+      width: 100%;
+      position: relative;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+    .hero-code::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, rgba(245,166,35,0.3), transparent 50%);
+      z-index: -1;
+    }
+    .code-comment { color: var(--text-faint); }
+    .code-key { color: var(--amber); }
+    .code-val { color: #a8d8a8; }
+
+    .hero-actions {
+      margin-top: 36px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .btn-primary {
+      background: var(--amber);
+      color: #0a0a08;
+      padding: 13px 28px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { background: #ffc04a; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-dim);
+      padding: 13px 28px;
+      border-radius: 8px;
+      font-weight: 400;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--amber-dim); color: var(--text); }
+
+    .hero-stats {
+      margin-top: 64px;
+      display: flex;
+      gap: 48px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.6s 0.5s ease both;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--amber);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-faint);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* DIVIDER */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 40px;
+    }
+
+    /* SECTION HEADER */
+    .section-wrap { max-width: 1100px; margin: 0 auto; padding: 100px 24px; }
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--amber);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(28px, 4vw, 42px);
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px;
+      color: var(--text-dim);
+      max-width: 520px;
+      font-weight: 300;
+    }
+
+    /* PROBLEM */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 56px;
+    }
+    .problem-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      transition: border-color 0.3s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--amber), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .problem-card:hover { border-color: rgba(245,166,35,0.3); transform: translateY(-3px); }
+    .problem-card:hover::before { opacity: 1; }
+    .problem-icon {
+      width: 40px; height: 40px;
+      background: var(--amber-glow);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+    .problem-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .problem-card p { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+
+    /* HOW IT WORKS */
+    .how-wrap { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0;
+      margin-top: 56px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .step {
+      padding: 36px 32px;
+      position: relative;
+    }
+    .step:not(:last-child) {
+      border-right: 1px solid var(--border);
+    }
+    .step-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--amber);
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+    .step h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .step p { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+    .step-icon { font-size: 24px; margin-bottom: 16px; }
+
+    /* PRICING */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 56px;
+    }
+    .price-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 36px 28px;
+      position: relative;
+      transition: border-color 0.3s, transform 0.2s;
+    }
+    .price-card:hover { transform: translateY(-3px); }
+    .price-card.featured {
+      border-color: var(--amber);
+      background: linear-gradient(160deg, rgba(245,166,35,0.06), var(--surface));
+    }
+    .price-badge {
+      position: absolute;
+      top: -12px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--amber);
+      color: #0a0a08;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 100px;
+      white-space: nowrap;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+    .price-tier {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--amber);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .price-amount {
+      font-family: 'Syne', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+    .price-period { font-size: 14px; color: var(--text-faint); font-weight: 300; margin-top: 4px; }
+    .price-features {
+      list-style: none;
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .price-features li {
+      font-size: 14px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .price-features li::before {
+      content: '→';
+      color: var(--amber);
+      font-family: 'IBM Plex Mono', monospace;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .price-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    /* WAITLIST */
+    .waitlist-wrap {
+      text-align: center;
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 100px 24px;
+    }
+    .waitlist-wrap .section-title { margin-bottom: 12px; }
+    .waitlist-wrap .section-sub { margin: 0 auto 36px; }
+    .waitlist-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .waitlist-input {
+      flex: 1;
+      min-width: 220px;
+      padding: 13px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .waitlist-input:focus { border-color: var(--amber); }
+    .waitlist-input::placeholder { color: var(--text-faint); }
+    .waitlist-note {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--text-faint);
+    }
+    .success-msg {
+      display: none;
+      margin-top: 20px;
+      padding: 14px 20px;
+      background: rgba(74, 222, 128, 0.08);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      border-radius: 8px;
+      color: var(--green);
+      font-size: 14px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      color: var(--amber);
+      font-size: 16px;
+    }
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-faint);
+    }
+    .footer-link {
+      font-size: 13px;
+      color: var(--text-faint);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-link:hover { color: var(--amber); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* MOBILE */
+    @media (max-width: 700px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .section-wrap { padding: 70px 20px; }
+      .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); }
+      footer { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 2h6l2 5H7L9 2z"/>
+        <path d="M7 7v3a5 5 0 0 0 10 0V7"/>
+        <line x1="12" y1="15" x2="12" y2="22"/>
+        <line x1="9" y1="22" x2="15" y2="22"/>
+      </svg>
+      Lantern
+    </div>
+    <ul class="nav-links">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#waitlist" class="nav-cta">Join waitlist</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Now accepting pilot companies
+    </div>
+    <h1>Full visibility for <em>AI apps</em> in Africa</h1>
+    <p class="hero-sub">One SDK. Real-time guardrails. A live dashboard that shows you everything. Built for African startups, not Silicon Valley enterprises.</p>
+    <div class="hero-code">
+      <div class="code-comment"># that's it. you're protected.</div>
+      <div style="margin-top: 10px;">
+        <span class="code-key">import</span> lantern <span class="code-key">from</span> <span class="code-val">'lantern-ai'</span>
+      </div>
+      <div>lantern.<span class="code-key">wrap</span>(client)</div>
+    </div>
+    <div class="hero-actions">
+      <a href="#waitlist" class="btn-primary">Join the waitlist →</a>
+      <a href="#how" class="btn-secondary">See how it works</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">$1.5B</div>
+        <div class="stat-label">Market today</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">700+</div>
+        <div class="stat-label">African AI startups</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">$0</div>
+        <div class="stat-label">Local solutions</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PROBLEM -->
+  <section id="problem">
+    <div class="section-wrap">
+      <div class="section-label reveal">The problem</div>
+      <h2 class="section-title reveal">Companies deploying AI<br/>are flying blind</h2>
+      <p class="section-sub reveal">AI is being pushed into production across Africa with no visibility, no safety checks, and no guardrails.</p>
+      <div class="problem-grid">
+        <div class="problem-card reveal">
+          <div class="problem-icon">💸</div>
+          <h3>Runaway API costs</h3>
+          <p>A single misconfigured prompt loop can generate thousands of dollars in LLM charges overnight. Most teams find out on their monthly invoice.</p>
+        </div>
+        <div class="problem-card reveal">
+          <div class="problem-icon">🔓</div>
+          <h3>Security threats go undetected</h3>
+          <p>Prompt injections, PII leaks, and toxic outputs are invisible without dedicated tooling. Fintech and healthtech are especially exposed.</p>
+        </div>
+        <div class="problem-card reveal">
+          <div class="problem-icon">🌍</div>
+          <h3>No local solution exists</h3>
+          <p>Existing tools like Datadog start at $3,000/month and are built for US enterprises. African startups are left unprotected or patching things together.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="how-wrap">
+    <div class="section-wrap">
+      <div class="section-label reveal">How it works</div>
+      <h2 class="section-title reveal">One SDK. Three steps.<br/>Total coverage.</h2>
+      <div class="steps reveal">
+        <div class="step">
+          <div class="step-num">01 — INSTALL</div>
+          <div class="step-icon">⚡</div>
+          <h3>Wrap your LLM calls</h3>
+          <p>Drop in the Lantern SDK. All traffic routes through it. No infrastructure changes required. Two lines of code.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02 — PROTECT</div>
+          <div class="step-icon">🛡</div>
+          <h3>Guardrails in real time</h3>
+          <p>Every request scanned for prompt injections, PII leaks, and toxic outputs before hitting the API.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03 — MONITOR</div>
+          <div class="step-icon">📊</div>
+          <h3>See everything</h3>
+          <p>Cost, latency, errors, and incidents in a live dashboard. Alerts fire the moment anything spikes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="section-wrap">
+      <div class="section-label reveal">Pricing</div>
+      <h2 class="section-title reveal">Simple, usage-based pricing</h2>
+      <p class="section-sub reveal">Start free. Pay as you scale. No enterprise contracts, no surprise invoices.</p>
+      <div class="pricing-grid">
+        <div class="price-card reveal">
+          <div class="price-tier">Starter</div>
+          <div class="price-amount">$99</div>
+          <div class="price-period">per month</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li>Up to 1M tokens/month</li>
+            <li>Monitoring and alerts</li>
+            <li>Basic guardrails</li>
+            <li>1 user seat</li>
+          </ul>
+        </div>
+        <div class="price-card featured reveal">
+          <div class="price-badge">MOST POPULAR</div>
+          <div class="price-tier">Growth</div>
+          <div class="price-amount">$299</div>
+          <div class="price-period">per month</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li>Up to 10M tokens/month</li>
+            <li>Full monitoring suite</li>
+            <li>All guardrails</li>
+            <li>5 user seats</li>
+          </ul>
+        </div>
+        <div class="price-card reveal">
+          <div class="price-tier">Scale</div>
+          <div class="price-amount">$499</div>
+          <div class="price-period">per month</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li>Unlimited tokens</li>
+            <li>Custom alert rules</li>
+            <li>Priority support</li>
+            <li>Unlimited seats</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- WAITLIST -->
+  <section id="waitlist">
+    <div class="waitlist-wrap">
+      <div class="section-label reveal" style="text-align:center;">Early access</div>
+      <h2 class="section-title reveal">Get in early</h2>
+      <p class="section-sub reveal">We're onboarding a small group of pilot companies for free. If you're deploying AI in Africa, we want to talk.</p>
+      <div class="waitlist-form reveal">
+        <input type="email" class="waitlist-input" id="emailInput" placeholder="you@company.com" />
+        <button class="btn-primary" onclick="handleSubmit()">Join waitlist</button>
+      </div>
+      <div class="success-msg" id="successMsg">
+        ✓ You're on the list. We'll be in touch shortly.
+      </div>
+      <p class="waitlist-note reveal">Or email us directly at <a href="mailto:hello@getlantern.dev" style="color: var(--amber); text-decoration: none;">hello@getlantern.dev</a></p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Lantern</div>
+    <div class="footer-copy">© 2025 Lantern. Built in Nairobi.</div>
+    <a href="mailto:hello@getlantern.dev" class="footer-link">hello@getlantern.dev</a>
+  </footer>
+
+  <script>
+    // Nav scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    reveals.forEach(el => observer.observe(el));
+
+    // Waitlist form
+    function handleSubmit() {
+      const email = document.getElementById('emailInput').value;
+      if (!email || !email.includes('@')) {
+        document.getElementById('emailInput').style.borderColor = 'var(--red)';
+        setTimeout(() => document.getElementById('emailInput').style.borderColor = '', 1500);
+        return;
+      }
+      const mailto = `mailto:hello@getlantern.dev?subject=Waitlist%20signup&body=Please%20add%20me%20to%20the%20Lantern%20waitlist.%0A%0AEmail:%20${encodeURIComponent(email)}`;
+      window.location.href = mailto;
+      document.getElementById('successMsg').style.display = 'block';
+      document.getElementById('emailInput').value = '';
+    }
+
+    document.getElementById('emailInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSubmit();
+    });
+  </script>
+
+</body>
+</html>
