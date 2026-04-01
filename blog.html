@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Lantern</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--amber:#EF9F27;--amber-dark:#BA7517;--navy:#1A1A2E;--navy-mid:#22223A;--muted:rgba(255,255,255,0.5);--border:rgba(255,255,255,0.07);--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--navy);color:#fff;font-size:16px;line-height:1.6;overflow-x:hidden}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 6%;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(26,26,46,0.88);backdrop-filter:blur(14px);border-bottom:0.5px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-text{font-size:20px;font-weight:600;color:#fff;letter-spacing:-.03em}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{font-size:14px;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:#fff}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.btn-ghost{font-family:var(--font);font-size:13px;font-weight:500;color:rgba(255,255,255,.65);background:none;border:none;cursor:pointer;padding:8px 14px;transition:color .2s}
+.btn-ghost:hover{color:#fff}
+.btn-nav{font-family:var(--font);font-size:13px;font-weight:600;color:var(--navy);background:var(--amber);border:none;cursor:pointer;padding:9px 20px;border-radius:8px;text-decoration:none;display:inline-block;transition:all .2s}
+.btn-nav:hover{background:#f5ab3d;transform:translateY(-1px)}
+
+.page-header{padding:120px 6% 56px;border-bottom:0.5px solid var(--border)}
+.page-header-inner{max-width:1100px;margin:0 auto}
+.eyebrow{font-size:11px;font-weight:600;color:var(--amber);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}
+.page-header h1{font-size:clamp(32px,4.5vw,52px);font-weight:700;letter-spacing:-.035em;line-height:1.08;margin-bottom:12px}
+.page-header p{font-size:16px;color:var(--muted);font-weight:300;max-width:480px;line-height:1.7}
+.medium-note{margin-top:20px;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.4)}
+.medium-note a{color:var(--amber);text-decoration:none;font-weight:500}
+.medium-note a:hover{text-decoration:underline}
+
+.blog-body{padding:56px 6%;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr;gap:48px;align-items:start}
+
+/* Posts */
+.posts{display:flex;flex-direction:column;gap:0}
+
+.post-card{padding:32px 0;border-bottom:0.5px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start;cursor:pointer;transition:opacity .15s}
+.post-card:first-child{padding-top:0}
+.post-card:hover{opacity:.85}
+
+.post-tag{font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.post-title{font-size:20px;font-weight:600;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px;color:#fff}
+.post-excerpt{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.post-meta{display:flex;align-items:center;gap:14px;font-size:12px;color:rgba(255,255,255,.3)}
+.post-meta-dot{width:3px;height:3px;border-radius:50%;background:currentColor}
+.post-read-more{font-size:12px;color:var(--amber);font-weight:500;text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap;margin-top:4px}
+.post-read-more:hover{text-decoration:underline}
+
+.post-thumb{width:100px;height:80px;border-radius:8px;background:var(--navy-mid);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Featured post */
+.post-featured{background:var(--navy-mid);border:0.5px solid rgba(239,159,39,.2);border-radius:16px;padding:32px;margin-bottom:0;cursor:pointer;transition:border-color .2s}
+.post-featured:hover{border-color:rgba(239,159,39,.4)}
+.post-featured .post-title{font-size:24px}
+.post-featured-badge{display:inline-block;font-size:10px;font-weight:600;color:var(--navy);background:var(--amber);padding:3px 10px;border-radius:100px;letter-spacing:.06em;margin-bottom:14px}
+
+/* Sidebar */
+.sidebar{display:flex;flex-direction:column;gap:24px;position:sticky;top:84px}
+.sidebar-card{background:var(--navy-mid);border:0.5px solid var(--border);border-radius:12px;padding:20px}
+.sidebar-title{font-size:12px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.topic-pill{display:inline-block;font-size:11px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--border);color:rgba(255,255,255,.5);margin:0 4px 6px 0;cursor:pointer;transition:all .15s;text-decoration:none}
+.topic-pill:hover,.topic-pill.active{border-color:var(--amber);color:var(--amber)}
+.recent-post{padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer}
+.recent-post:last-child{border-bottom:none;padding-bottom:0}
+.recent-post-title{font-size:13px;color:rgba(255,255,255,.75);line-height:1.45;margin-bottom:4px;transition:color .15s}
+.recent-post:hover .recent-post-title{color:#fff}
+.recent-post-date{font-size:11px;color:rgba(255,255,255,.3)}
+.subscribe-form{display:flex;flex-direction:column;gap:8px}
+.subscribe-input{width:100%;padding:9px 12px;background:rgba(255,255,255,.05);border:0.5px solid var(--border);border-radius:8px;font-family:var(--font);font-size:13px;color:#fff;outline:none;transition:border-color .2s}
+.subscribe-input::placeholder{color:rgba(255,255,255,.3)}
+.subscribe-input:focus{border-color:var(--amber)}
+.subscribe-btn{width:100%;padding:10px;background:var(--amber);color:var(--navy);border:none;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.subscribe-btn:hover{background:#f5ab3d}
+.subscribe-note{font-size:11px;color:rgba(255,255,255,.25);text-align:center}
+
+footer{background:var(--navy);border-top:0.5px solid var(--border);padding:40px 6%;margin-top:80px}
+.footer-bottom{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.22)}
+.footer-nav{display:flex;gap:24px}
+.footer-nav a{color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
+.footer-nav a:hover{color:#fff}
+
+@media(max-width:768px){
+  .nav-links{display:none}
+  .blog-body{grid-template-columns:1fr}
+  .sidebar{position:static}
+  .post-thumb{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <svg width="24" height="28" viewBox="0 0 44 52" fill="none">
+      <rect x="15" y="0" width="14" height="3" rx="1.5" fill="#EF9F27"/>
+      <path d="M17 3 Q22 0 27 3" fill="none" stroke="#EF9F27" stroke-width="2" stroke-linecap="round"/>
+      <rect x="13" y="3" width="18" height="4" rx="2" fill="#EF9F27"/>
+      <rect x="10" y="7" width="24" height="3" rx="1.5" fill="#BA7517"/>
+      <path d="M12 10 Q7 13 6 20 L6 34 Q7 40 12 42 L32 42 Q37 40 38 34 L38 20 Q37 13 32 10 Z" fill="#EF9F27"/>
+      <path d="M22 20 Q25 15 22 11 Q19 15 22 20Z" fill="#FFF8EE" fill-opacity=".85"/>
+      <rect x="9" y="42" width="26" height="3" rx="1.5" fill="#BA7517"/>
+      <rect x="7" y="45" width="30" height="5" rx="2.5" fill="#854F0B"/>
+      <path d="M12 10 L5 10 Q3 10 3 12 L3 41 Q3 43 5 43 L12 43" fill="none" stroke="#EF9F27" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M32 10 L39 10 Q41 10 41 12 L41 41 Q41 43 39 43 L32 43" fill="none" stroke="#EF9F27" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="nav-logo-text">Lantern</span>
+  </a>
+  <div class="nav-links">
+    <a href="/#features">Features</a>
+    <a href="/#how">How it works</a>
+    <a href="/#pricing">Pricing</a>
+    <a href="https://docs.getlantern.dev">Docs</a>
+    <a href="/about.html">About</a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-ghost" onclick="location.href='https://app.getlantern.dev/login'">Sign in</button>
+    <a href="https://app.getlantern.dev/signup" class="btn-nav">Try free</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="eyebrow">Blog</div>
+    <h1>Insights on AI safety,<br>observability, and building in Africa</h1>
+    <p>Thoughts on LLM security, the African AI ecosystem, and what we are learning building Lantern.</p>
+    <div class="medium-note">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="rgba(255,255,255,.3)" stroke-width="1"/><path d="M5 5.5c1.5-1 3.5-1 5 0" stroke="rgba(255,255,255,.3)" stroke-width="1" stroke-linecap="round"/></svg>
+      Full articles published on <a href="https://medium.com" target="_blank" rel="noopener">Medium</a> — links will be updated as posts go live
+    </div>
+  </div>
+</div>
+
+<div class="blog-body">
+  <div class="posts">
+
+    <!-- Featured -->
+    <div class="post-featured" onclick="window.open('https://medium.com/@getlantern','_blank')">
+      <div class="post-featured-badge">LATEST</div>
+      <div class="post-tag">Security</div>
+      <div class="post-title">Why African fintechs are the most exposed to LLM prompt injection attacks</div>
+      <div class="post-excerpt">Fintech companies in Kenya, Nigeria, and South Africa are deploying AI for credit scoring, fraud detection, and customer support faster than anywhere else on the continent. They are also the least protected. Here is what we found when we looked at how prompt injection actually works in production fintech systems — and what you can do about it in an afternoon.</div>
+      <div class="post-meta">
+        <span>Dorine Tipo</span>
+        <span class="post-meta-dot"></span>
+        <span>8 min read</span>
+        <span class="post-meta-dot"></span>
+        <span>Coming soon on Medium</span>
+      </div>
+    </div>
+
+    <!-- Post 2 -->
+    <div class="post-card" onclick="window.open('https://medium.com/@getlantern','_blank')">
+      <div>
+        <div class="post-tag">Cost control</div>
+        <div class="post-title">The $4,000 prompt loop that started Lantern</div>
+        <div class="post-excerpt">A Nairobi fintech's LLM integration hit an infinite retry loop at 2am. Nobody noticed until the monthly Anthropic invoice arrived. This is the story of how that happened, what it cost, and the monitoring gap that made it invisible.</div>
+        <div class="post-meta">
+          <span>Dorine Tipo</span>
+          <span class="post-meta-dot"></span>
+          <span>5 min read</span>
+          <span class="post-meta-dot"></span>
+          <span>Coming soon on Medium</span>
+        </div>
+        <a href="https://medium.com/@getlantern" target="_blank" rel="noopener" class="post-read-more" onclick="event.stopPropagation()">Read on Medium →</a>
+      </div>
+      <div class="post-thumb">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M8 26l5-7 5 4 5-8 5 4" stroke="#EF9F27" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/><circle cx="28" cy="10" r="4" stroke="#EF9F27" stroke-width="1.5" opacity=".5"/></svg>
+      </div>
+    </div>
+
+    <!-- Post 3 -->
+    <div class="post-card" onclick="window.open('https://medium.com/@getlantern','_blank')">
+      <div>
+        <div class="post-tag">Engineering</div>
+        <div class="post-title">How we built PII redaction for African phone numbers in 200 lines of Python</div>
+        <div class="post-excerpt">M-Pesa transaction codes, Kenyan national IDs, Nigerian BVNs, South African ID numbers — the PII patterns that matter most in African AI applications are not in any standard library. Here is the regex and logic we built, and why it is harder than it looks.</div>
+        <div class="post-meta">
+          <span>Dorine Tipo</span>
+          <span class="post-meta-dot"></span>
+          <span>12 min read</span>
+          <span class="post-meta-dot"></span>
+          <span>Coming soon on Medium</span>
+        </div>
+        <a href="https://medium.com/@getlantern" target="_blank" rel="noopener" class="post-read-more" onclick="event.stopPropagation()">Read on Medium →</a>
+      </div>
+      <div class="post-thumb">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="8" y="10" width="20" height="16" rx="3" stroke="#EF9F27" stroke-width="1.5" opacity=".5"/><path d="M13 18h10M13 22h6" stroke="#EF9F27" stroke-width="1.5" stroke-linecap="round" opacity=".5"/></svg>
+      </div>
+    </div>
+
+    <!-- Post 4 -->
+    <div class="post-card" onclick="window.open('https://medium.com/@getlantern','_blank')">
+      <div>
+        <div class="post-tag">Market</div>
+        <div class="post-title">700 funded African startups are deploying AI right now. Almost none of them have observability.</div>
+        <div class="post-excerpt">We surveyed the African startup landscape. The numbers are striking — AI adoption is accelerating across fintech, healthtech, edtech, and logistics. The tooling to safely operate that AI has not kept up. Here is the data and what it means for the ecosystem.</div>
+        <div class="post-meta">
+          <span>Dorine Tipo</span>
+          <span class="post-meta-dot"></span>
+          <span>7 min read</span>
+          <span class="post-meta-dot"></span>
+          <span>Coming soon on Medium</span>
+        </div>
+        <a href="https://medium.com/@getlantern" target="_blank" rel="noopener" class="post-read-more" onclick="event.stopPropagation()">Read on Medium →</a>
+      </div>
+      <div class="post-thumb">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="9" stroke="#EF9F27" stroke-width="1.5" opacity=".5"/><path d="M18 9v9l6 3" stroke="#EF9F27" stroke-width="1.5" stroke-linecap="round" opacity=".5"/></svg>
+      </div>
+    </div>
+
+    <!-- Post 5 -->
+    <div class="post-card" onclick="window.open('https://medium.com/@getlantern','_blank')">
+      <div>
+        <div class="post-tag">Product</div>
+        <div class="post-title">What two lines of code actually means — the design decisions behind the Lantern SDK</div>
+        <div class="post-excerpt">lantern.init() and lantern.wrap() are the public interface. Behind them is a set of deliberate design decisions: no threading in v0.1, fire-and-forget logging, guardrails as stateless functions, and a proxy that patches the Anthropic client in place. Here is why we made those choices.</div>
+        <div class="post-meta">
+          <span>Dorine Tipo</span>
+          <span class="post-meta-dot"></span>
+          <span>10 min read</span>
+          <span class="post-meta-dot"></span>
+          <span>Coming soon on Medium</span>
+        </div>
+        <a href="https://medium.com/@getlantern" target="_blank" rel="noopener" class="post-read-more" onclick="event.stopPropagation()">Read on Medium →</a>
+      </div>
+      <div class="post-thumb">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M11 18l4 4 10-10" stroke="#EF9F27" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/><circle cx="18" cy="18" r="9" stroke="#EF9F27" stroke-width="1.5" opacity=".5"/></svg>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">Topics</div>
+      <div>
+        <a href="#" class="topic-pill active">All</a>
+        <a href="#" class="topic-pill">Security</a>
+        <a href="#" class="topic-pill">Engineering</a>
+        <a href="#" class="topic-pill">Cost control</a>
+        <a href="#" class="topic-pill">Market</a>
+        <a href="#" class="topic-pill">Product</a>
+        <a href="#" class="topic-pill">Africa</a>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">Get new posts</div>
+      <div class="subscribe-form">
+        <input type="email" class="subscribe-input" placeholder="you@company.com">
+        <button class="subscribe-btn">Subscribe</button>
+        <div class="subscribe-note">No spam. Unsubscribe anytime.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">Recent posts</div>
+      <div class="recent-post">
+        <div class="recent-post-title">Why African fintechs are the most exposed to LLM prompt injection attacks</div>
+        <div class="recent-post-date">Coming soon</div>
+      </div>
+      <div class="recent-post">
+        <div class="recent-post-title">The $4,000 prompt loop that started Lantern</div>
+        <div class="recent-post-date">Coming soon</div>
+      </div>
+      <div class="recent-post">
+        <div class="recent-post-title">PII redaction for African phone numbers in 200 lines of Python</div>
+        <div class="recent-post-date">Coming soon</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card" style="background:rgba(239,159,39,.05);border-color:rgba(239,159,39,.2)">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Try Lantern free</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Two lines of code to full LLM observability and security. No credit card required.</div>
+      <a href="https://app.getlantern.dev/signup" style="display:block;text-align:center;background:var(--amber);color:var(--navy);padding:10px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .2s" onmouseover="this.style.background='#f5ab3d'" onmouseout="this.style.background='var(--amber)'">Get started free</a>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <span>2025 Lantern. Built in Nairobi, Kenya.</span>
+    <div class="footer-nav">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/blog.html">Blog</a>
+      <a href="mailto:info@getlantern.dev">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
