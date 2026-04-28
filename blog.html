@@ -291,7 +291,8 @@ footer{background:var(--navy);border-top:0.5px solid var(--border);padding:40px 
       <a href="/">Home</a>
       <a href="/about.html">About</a>
       <a href="/blog.html">Blog</a>
-      <a href="mailto:info@getlantern.dev">Contact</a>
+      <a id="blog-contact-link" href="#">Contact</a>
+      <script>document.getElementById('blog-contact-link').href='mailto:'+['info','getlantern.dev'].join('@')</script>
     </div>
   </div>
 </footer>
